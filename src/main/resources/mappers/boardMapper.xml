@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.portfolio.yshome.mappers.boardMapper">
+	<insert id="create" parameterType="com.portfolio.yshome.domain.BoardDTO">
+		INSERT INTO tbl_board(bno,
+		title, content, writer, bgroup, bseq, depth)
+		VALUES(board_seq.nextval,
+		#{title}, #{content}, #{writer}, board_seq.nextval, #{bseq}, #{depth})
+	</insert>
+
+	<insert id="comment" parameterType="com.portfolio.yshome.domain.BoardDTO">
+		INSERT INTO tbl_board(bno,
+		title, content, writer, bgroup, bseq, depth)
+		VALUES(board_seq.nextval,
+		#{title}, #{content}, #{writer}, #{bgroup}, #{bseq}, #{depth})
+	</insert>
+
+	<select id="read" parameterType="Integer"
+		resultType="com.portfolio.yshome.domain.BoardDTO">
+		SELECT *
+		FROM tbl_board
+		WHERE bno=#{bno}
+	</select>
+
+	<update id="update" parameterType="com.portfolio.yshome.domain.BoardDTO">
+		UPDATE tbl_board
+		SET
+		title=#{title}, content=#{content}
+		WHERE bno=#{bno}
+	</update>
+
+	<delete id="delete" parameterType="Integer">
+		DELETE FROM tbl_board
+		WHERE
+		bno=#{bno}
+	</delete>
+
+	<!-- <select id="listAll" resultType="com.portfolio.yshome.domain.BoardDTO"> 
+		<![CDATA[ SELECT * FROM tbl_board WHERE bno>0 ORDER BY bno DESC, regdate 
+		DESC ]]> </select> -->
+
+	<select id="detail" resultType="com.portfolio.yshome.domain.BoardDTO"
+		parameterType="Integer">
+		SELECT *
+		FROM (SELECT bno, title, content, regdate,
+		writer, viewcnt, bgroup, bseq, depth,
+		LEAD(title,1,'다음글') OVER(ORDER BY
+		bno) NEXTtitle,
+		LEAD(bno,1) OVER(ORDER BY bno) NEXTbno,
+		LEAD(regdate,1)
+		OVER(ORDER BY bno) NEXTregdate,
+		LEAD(writer,1) OVER(ORDER BY bno)
+		NEXTwriter,
+		LEAD(viewcnt,1) OVER(ORDER BY bno) NEXTviewcnt,
+		LEAD(bgroup,1) OVER(ORDER BY bno) NEXTbgroup,
+		LEAD(bseq,1) OVER(ORDER BY bno) NEXTbseq,
+		LEAD(depth,1) OVER(ORDER BY bno) NEXTdepth,
+		Lag(title,1,'이전글') OVER(ORDER BY bno)
+		PREVtitle,
+		Lag(bno,1) OVER(ORDER BY bno) PREVbno,
+		Lag(regdate,1)
+		OVER(ORDER BY bno) PREVregdate,
+		Lag(writer,1) OVER(ORDER BY bno)
+		PREVwriter,
+		Lag(viewcnt,1) OVER(ORDER BY bno) PREVviewcnt,
+		Lag(bgroup,1) OVER(ORDER BY bno) PREVbgroup,
+		Lag(bseq,1) OVER(ORDER BY bno) PREVbseq,
+		Lag(depth,1) OVER(ORDER BY bno) PREVdepth
+		FROM tbl_board
+		)
+		WHERE
+		bno=#{bno}
+	</select>
+
+	<select id="detailcnt" parameterType="com.portfolio.yshome.domain.BoardDTO">
+		update tbl_board set
+		viewcnt=#{viewcnt}+1 where bno=#{bno}
+	</select>
+	
+	<insert id="fileUpload" parameterType="com.portfolio.yshome.domain.FileDTO">
+		<selectKey resultType="int" order="BEFORE" keyProperty="fgroup">
+			select board_seq.currval from dual
+		</selectKey>
+		INSERT INTO filestb
+		(fno, fgroup, filename, filetype)
+		VALUES
+		(files_seq.nextval, #{fgroup}, #{filename}, #{filetype})
+	</insert>
+
+	<select id="listCriteria" resultType="com.portfolio.yshome.domain.BoardDTO"
+		parameterType="com.portfolio.yshome.domain.CriteriaDTO">
+		<!-- 댓글기능 구현 이전 리스트 올 모든페이지 화면
+			<![CDATA[ SELECT * FROM (SELECT ROWNUM RNUM, a.* FROM (SELECT * FROM 
+			tbl_board WHERE bno > 0 ]]> <include refid="dynamicSearch" /> <![CDATA[ ORDER 
+			BY bno DESC) a) WHERE RNUM BETWEEN #{pageStart} AND #{pageEnd} ]]> -->
+		<![CDATA[
+		SELECT * FROM
+		(SELECT ROWNUM AS RNUM , a.* FROM
+		(SELECT * FROM tbl_board
+		WHERE bno > 0
+		]]>
+		<include refid="dynamicSearch" />
+		<![CDATA[
+		START WITH bseq = 0
+		CONNECT BY PRIOR bno = bseq
+		ORDER SIBLINGS BY bgroup desc, bno asc) a)
+		WHERE RNUM BETWEEN #{pageStart} AND #{pageEnd}
+		]]>
+	</select>
+	<sql id="dynamicSearch">
+		<if test="searchType != null">
+			<if test="searchType == 'title'">
+				AND title LIKE '%'||#{keyWord}||'%'
+			</if>
+			<if test="searchType == 'content'">
+				AND content LIKE '%'||#{keyWord}||'%'
+			</if>
+			<if test="searchType == 'writer'">
+				AND writer LIKE '%'||#{keyWord}||'%'
+			</if>
+			<if test="searchType == 'multi'">
+				AND title LIKE '%'||#{keyWord}||'%' OR content LIKE
+				'%'||#{keyWord}||'%'
+			</if>
+		</if>
+	</sql>
+
+	<select id="paperNum" resultType="int"
+		parameterType="com.portfolio.yshome.domain.CriteriaDTO">
+		SELECT CEIL(count(*)/#{perPageNum})
+		FROM tbl_board
+		WHERE bno>0
+		<include refid="dynamicSearch" />
+	</select>
+
+
+
+</mapper>

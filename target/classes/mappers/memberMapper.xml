@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ <mapper namespace="com.portfolio.yshome.mappers.memberMapper">
+ 	<insert id="join" parameterType="memberDTO">
+ 		INSERT INTO member (id, pw, name, nick, addr, email, birth)
+ 		VALUES(#{id}, #{pw}, #{name}, #{nick}, #{addr}, #{email}, #{birth})
+ 	</insert>
+ 	
+ 	<select id="idcheck" parameterType="String" resultType="int">
+ 		SELECT COUNT(*)
+ 		FROM member
+ 		WHERE id=#{id}
+ 	</select>
+ 	
+ 	<select id="login" parameterType="memberDTO" resultType="memberDTO">
+ 		SELECT id, pw, name, nick, addr, email, birth, status
+ 		FROM member
+ 		WHERE id=#{id} and pw=#{pw} and status='y'
+ 	</select>
+ 	
+ 	<select id="mypage" parameterType="String" resultType="memberDTO">
+ 		SELECT *
+ 		FROM member
+ 		WHERE id=#{id} and status='y'
+ 	</select>
+ 	
+	<update id="mypageEdit" parameterType="memberDTO">
+		UPDATE member 
+		SET pw=#{pw}, addr=#{addr}, email=#{email}, birth=#{birth} 
+		WHERE id=#{id}
+	</update>
+	
+	<delete id="delete" parameterType="memberDTO">
+		DELETE FROM member
+		WHERE id=#{id} and pw=#{pw} 	
+	</delete>
+ </mapper>
+  
+  
