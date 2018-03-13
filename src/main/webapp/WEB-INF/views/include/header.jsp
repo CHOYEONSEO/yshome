@@ -42,6 +42,13 @@
 </head>
 <!-- jQuery 2.2.3 -->
 <script src="/resources/plugins/jQuery/jquery-2.2.3.min.js"></script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("#log").on("click", function() {
+			location.href = "/yshome/login_form";
+		});
+	});
+</script>
 
 <body class="skin-blue sidebar-mini">
 	<div class="wrapper">
@@ -62,7 +69,7 @@
 				</a>
 				<div class="navbar-custom-menu">
 					<ul class="nav navbar-nav">
-						
+
 						<!-- Control Sidebar Toggle Button -->
 						<li><a href="#" data-toggle="control-sidebar"><i
 								class="fa fa-gears"></i></a></li>
@@ -78,14 +85,16 @@
 				<div class="user-panel">
 					<div class="pull-left image">
 						<c:if test="${!empty id}">
-						<img src="../../resources/images/login.gif" class="img-circle" alt="User Image" />
+							<img src="../../resources/images/login.gif" class="img-circle"
+								alt="User Image" />
 						</c:if>
 						<c:if test="${empty id}">
-						<img src="../../resources/images/logout.gif" class="img-circle" alt="User Image" />
-							<button>Login</button>
+							<img src="../../resources/images/logout.gif" class="img-circle"
+								alt="User Image" />
+							<button class="btn btn-primary" id="log" style="margin: 0 0 0 30px; width:100px;">Login</button>
 						</c:if>
 					</div>
-					<div class="pull-left info" >
+					<div class="pull-left info">
 						<p>
 							<c:if test="${!empty id}">
 								<security:authorize access="isAuthenticated()">
@@ -93,10 +102,10 @@
 										<input type="hidden" name="${_csrf.parameterName}"
 											value="${_csrf.token}">
 										<button type="submit" style="border: none; background: none;">
-										${id} <i class="fa fa-sign-out" style="font-size: 15px; color: red"></i>
+											${id} <i class="fa fa-sign-out"
+												style="font-size: 15px; color: red"></i>
 										</button>
 										<!-- <input type="submit" value="LogOut" style="size: 20px; font-size: xx-small;"> -->
-
 									</form>
 								</security:authorize>
 							</c:if>
@@ -123,15 +132,19 @@
 							<span>Board</span> <i class="fa fa-angle-left pull-right"></i>
 					</a>
 						<ul class="treeview-menu">
-							<li><a href="/yshome/listAll"><i
-									class="fa fa-circle-o"></i> Free Board</a></li>
+							<li><a href="/yshome/listAll"><i class="fa fa-circle-o"></i>
+									Free Board</a></li>
 						</ul></li>
+					<c:if test="${!empty id}">
 					<li class="treeview"><a href="#"> <i class="fa fa-files-o"></i>
 							<span>Mypage</span> <i class="fa fa-angle-left pull-right"></i>
 					</a>
-						<ul class="treeview-menu">
-							<li><a href="/yshome/mypage_form?id=${id}"><i class="fa fa-circle-o"></i> Profile</a></li>
-						</ul></li>
+							<ul class="treeview-menu">
+								<li><a href="/yshome/mypage_form?id=${id}"><i
+									class="fa fa-circle-o"></i> Profile</a></li>
+							</ul>
+					</li>
+					</c:if>
 			</section>
 			<!-- /.sidebar -->
 		</aside>
@@ -146,16 +159,16 @@
 				<ol class="breadcrumb">
 					<li><a href="listAll"><i class="fa fa-dashboard"></i> Home</a></li>
 					<%-- <c:choose>
-					<c:when test="${!empty id}"> --%>
-					<security:authorize access="isAuthenticated()">
-						<li><a href="mypage_form?id=${id}" id="mypage">MyPage</a></li>
-					</security:authorize>
-					<%-- </c:when>
-					<c:otherwise> --%>
-					<security:authorize access="isAnonymous()">
-						<li><a href="login_form" id="login">Login</a></li>
-					</security:authorize>
-					<%-- 	</c:otherwise>          
-            	</c:choose> --%>
+						<c:when test="${!empty id}"> --%>
+							<security:authorize access="isAuthenticated()">
+								<li><a href="mypage_form?id=${id}" id="mypage">MyPage</a></li>
+							</security:authorize>
+						<%-- </c:when>
+						<c:otherwise> --%>
+							<security:authorize access="isAnonymous()">
+								<li><a href="login_form" id="login">Login</a></li>
+							</security:authorize>
+					<%-- </c:otherwise>
+					</c:choose> --%>
 				</ol>
 			</section>
